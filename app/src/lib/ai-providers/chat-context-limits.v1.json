@@ -1,0 +1,5 @@
+{
+  "version": "chat-context-limits-v1",
+  "max_estimated_tokens": 250000,
+  "token_estimate": "ceil(utf8_bytes / 3)"
+}

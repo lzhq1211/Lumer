@@ -1,0 +1,41 @@
+# Operating-system and editor files
+.DS_Store
+**/.DS_Store
+
+# Node.js / Next.js dependencies and generated output
+**/node_modules/
+**/.next/
+**/out/
+**/dist/
+**/coverage/
+**/playwright-report/
+**/test-results/
+
+# Python environments and caches
+**/.venv/
+**/__pycache__/
+*.py[cod]
+
+# Local configuration and credentials
+**/.env
+**/.env.local
+**/.env.*.local
+!**/.env.example
+*.pem
+
+# TypeScript and runtime logs
+**/*.tsbuildinfo
+**/next-env.d.ts
+*.log
+.lumer-launcher/
+
+# Local progress and design materials
+/PROGRESS.md
+/docs/frontend/
+/docs/map.png
+/Lumer Assistant.app/Contents/Resources/AppIcon.iconset/
+/app/public/file.svg
+/app/public/globe.svg
+/app/public/next.svg
+/app/public/vercel.svg
+/app/public/window.svg

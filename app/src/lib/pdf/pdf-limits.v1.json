@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "max_file_bytes": 52428800,
+  "max_pages": 500,
+  "max_extracted_chars": 600000,
+  "max_estimated_tokens": 250000,
+  "token_estimate": "ceil(utf8_bytes / 3)"
+}

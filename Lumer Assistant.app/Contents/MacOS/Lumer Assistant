@@ -1,0 +1,80 @@
+#!/bin/zsh
+
+set -u
+
+if [[ "$(/usr/bin/uname -m)" == 'x86_64' ]]; then
+  exec /usr/bin/arch -arm64 /bin/zsh "$0" "$@"
+fi
+
+export PATH='/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin'
+readonly CURRENT_USER="$(/usr/bin/id -un)"
+readonly CURRENT_USER_HOME="$(/usr/bin/dscl . -read \"/Users/$CURRENT_USER\" NFSHomeDirectory 2>/dev/null | /usr/bin/awk 'NR == 1 { print $2 }')"
+if [[ -n "$CURRENT_USER_HOME" && -d "$CURRENT_USER_HOME" ]]; then
+  export HOME="$CURRENT_USER_HOME"
+fi
+export CODEX_BIN='/usr/local/bin/codex'
+
+readonly LAUNCHER_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+readonly WEB_ROOT="$LAUNCHER_ROOT/app"
+readonly URL='http://127.0.0.1:3000'
+readonly STATE_DIR="$LAUNCHER_ROOT/.lumer-launcher"
+readonly LOG_FILE="$STATE_DIR/server.log"
+readonly PID_FILE="$STATE_DIR/server.pid"
+
+mkdir -p "$STATE_DIR"
+
+show_failure() {
+  /usr/bin/osascript -e "display alert \"Lumer Assistant 启动失败\" message \"请查看启动日志：$LOG_FILE\" as critical"
+  /usr/bin/open "$LOG_FILE"
+  exit 1
+}
+
+readonly NPM_BIN="$(command -v npm || true)"
+
+is_port_listening() {
+  /usr/sbin/lsof -nP -iTCP:3000 -sTCP:LISTEN >/dev/null 2>&1
+}
+
+is_ready() {
+  /usr/bin/curl --fail --silent --max-time 2 --output /dev/null "$URL/"
+}
+
+wait_until_ready() {
+  for _attempt in {1..60}; do
+    if is_ready; then return 0; fi
+    /bin/sleep 1
+  done
+  return 1
+}
+
+if is_port_listening; then
+  if wait_until_ready; then
+    /usr/bin/open "$URL"
+    exit 0
+  fi
+  show_failure
+fi
+
+if [[ -z "$NPM_BIN" ]]; then
+  show_failure
+fi
+
+if [[ ! -f "$WEB_ROOT/.next/BUILD_ID" ]]; then
+  (
+    cd "$WEB_ROOT" || exit 1
+    "$NPM_BIN" run build
+  ) >>"$LOG_FILE" 2>&1 || show_failure
+fi
+
+(
+  cd "$WEB_ROOT" || exit 1
+  /usr/bin/nohup /usr/bin/env PORT=3000 LUMER_AUTO_STOP=1 "$NPM_BIN" run start >>"$LOG_FILE" 2>&1 &
+  print -r -- "$!" >"$PID_FILE"
+)
+
+if wait_until_ready; then
+  /usr/bin/open "$URL"
+  exit 0
+fi
+
+show_failure
