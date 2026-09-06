@@ -11,6 +11,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20.9%2B-339933)](#快速开始)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](#快速开始)
 [![Status](https://img.shields.io/badge/status-MVP-orange)](#项目状态)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <br />
 
@@ -179,3 +180,9 @@ Lumer 当前是 MVP，欢迎大家提意见！将持续修改和优化
 ## 参与贡献
 
 欢迎提交 Issue 或 Pull Request。报告问题时，请附上系统版本、Node/Python 版本、复现步骤和错误信息。
+
+
+---
+## License
+
+This project is licensed under the [MIT License](LICENSE).
