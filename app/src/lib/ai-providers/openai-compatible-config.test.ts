@@ -43,10 +43,9 @@ describe('OpenAI-compatible environment configuration', () => {
     expect(readOpenAICompatibleConfig(env('http://[::1]:1234/v1', 'local-model'))).toMatchObject({ api_key: null });
   });
 
-  it('rejects non-loopback HTTP, missing /v1, credentials, query and fragment URLs', () => {
+  it('rejects non-loopback HTTP, credentials, query and fragment URLs', () => {
     for (const baseUrl of [
       'http://provider.example/v1',
-      'https://provider.example/api',
       'https://user:password@provider.example/v1',
       'https://provider.example/v1?tenant=test',
       'https://provider.example/v1#fragment',

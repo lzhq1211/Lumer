@@ -208,9 +208,9 @@ describe('OpenAI-compatible HTTP Provider', () => {
 
   it.each([
     ['empty content', { choices: [{ message: { content: '  ' } }] }, 'empty_content'],
-    ['wrong content type', { choices: [{ message: { content: ['not-string'] } }] }, 'invalid_response'],
+    ['wrong content type', { choices: [{ message: { content: ['not-string'] } }] }, 'empty_content'],
     ['missing choices', { id: 'task', model: 'model' }, 'invalid_response'],
-    ['missing message', { choices: [{}] }, 'invalid_response'],
+    ['missing message', { choices: [{}] }, 'empty_content'],
   ])('rejects %s without retaining the upstream response', async (_label, body, errorCode) => {
     const adapter = new OpenAICompatibleAdapter({ readConfig: () => config, fetchImpl: async () => jsonResponse(body) });
     await expectProtocolFailure(adapter, errorCode);

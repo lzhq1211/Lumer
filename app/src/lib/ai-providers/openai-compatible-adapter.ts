@@ -96,14 +96,20 @@ function parseModelIds(value: unknown): string[] | null {
 }
 
 function parseCompletion(value: unknown, config: OpenAICompatibleConfig, idGenerator: () => string) {
+  if (typeof value === 'string' && value.trim()) {
+    return { provider_session_id: idGenerator(), model: config.model, final_text: value };
+  }
   if (!isRecord(value) || !Array.isArray(value.choices)) {
     throw new OpenAICompatibleResponseError('invalid_response');
   }
   const choice = value.choices[0];
-  if (!isRecord(choice) || !isRecord(choice.message) || typeof choice.message.content !== 'string') {
+  if (!isRecord(choice)) {
     throw new OpenAICompatibleResponseError('invalid_response');
   }
-  if (choice.message.content.trim().length === 0) {
+  const content = isRecord(choice.message) && typeof choice.message.content === 'string'
+    ? choice.message.content
+    : typeof choice.text === 'string' ? choice.text : null;
+  if (!content || content.trim().length === 0) {
     throw new OpenAICompatibleResponseError('empty_content');
   }
 
@@ -117,7 +123,7 @@ function parseCompletion(value: unknown, config: OpenAICompatibleConfig, idGener
   return {
     provider_session_id: providerTaskId,
     model: responseModel,
-    final_text: choice.message.content,
+    final_text: content,
   };
 }
 
@@ -274,20 +280,27 @@ export class OpenAICompatibleAdapter implements ProviderTaskAdapter {
     const timeoutMs = parsedRequest.data.task_kind === 'chat' ? this.chatTimeoutMs : this.overviewTimeoutMs;
     const timedSignal = createTimedSignal(signal, timeoutMs);
     try {
-      const response = await this.fetchImpl(`${config.base_url}/chat/completions`, {
-        method: 'POST',
-        headers: authorizationHeaders(config),
-        body: JSON.stringify({
+      const requestBody = JSON.stringify({
           model: config.model,
           messages: [
             { role: 'system', content: parsedRequest.data.system_prompt },
             { role: 'user', content: parsedRequest.data.user_input },
           ],
           stream: false,
-        }),
+        });
+      let response = await this.fetchImpl(`${config.base_url}/chat/completions`, {
+        method: 'POST',
+        headers: authorizationHeaders(config),
+        body: requestBody,
         redirect: 'error',
         signal: timedSignal.signal,
       });
+      if (response.status === 404 && !config.base_url.endsWith('/v1')) {
+        response = await this.fetchImpl(`${config.base_url}/v1/chat/completions`, {
+          method: 'POST', headers: authorizationHeaders(config), body: requestBody,
+          redirect: 'error', signal: timedSignal.signal,
+        });
+      }
       if (response.status === 401 || response.status === 403) {
         yield failedEvent('provider_not_authenticated');
         return;

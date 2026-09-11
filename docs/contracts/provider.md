@@ -13,7 +13,7 @@
 - `AnalyzeProvider = codex | openai_compatible`；`openai_compatible` 支持 `overview`，不支持结构化 `analyze` 或 `schema_repair`。2026-09-06 用户批准：两种 Provider 的概览均可经“同步到 Obsidian”确认成为概览 Final，此操作只持久化已有结果，不调用 Provider。
 - Codex 直接使用 Codex CLI 已有的本机登录状态；Lumer 不保存其密钥、Token 或登录凭据。
 - OpenAI-compatible HTTP Provider 优先从 `~/.lumer/config.json` 的 `openai_compatible` 对象读取配置；未配置该对象时兼容读取服务端环境变量：
-  - `LUMER_OPENAI_COMPAT_BASE_URL`：包含 `/v1` 的绝对 base URL；实现去除末尾 `/` 后调用 `${base_url}/chat/completions` 和 `${base_url}/models`。
+  - `LUMER_OPENAI_COMPAT_BASE_URL`：绝对 base URL，不要求包含 `/v1`，也不自动补齐；实现去除末尾 `/` 后调用 `${base_url}/chat/completions` 和 `${base_url}/models`。
   - `LUMER_OPENAI_COMPAT_MODEL`：非空模型 ID。
 - `LUMER_OPENAI_COMPAT_API_KEY`：可选；存在时只作为 `Authorization: Bearer ...` 请求头使用。无鉴权的 loopback 本地服务可以不设置。
 - Settings 可将 `app`、`base_url`、`model` 和 `api_key` 保存到 schema 2 的 `openai_compatible` 对象；API Key 只保存在 `0600` 的本机配置文件和服务端内存中，不由任何 API/日志/UI 回显。

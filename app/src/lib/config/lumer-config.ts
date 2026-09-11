@@ -78,7 +78,6 @@ export function parseOpenAICompatibleSettings(value: unknown): OpenAICompatibleS
     const host = url.hostname.replace(/^\[|\]$/g, '').toLowerCase();
     const loopback = host === 'localhost' || host === '127.0.0.1' || host === '::1';
     if ((url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback))
-      || !url.pathname.split('/').some((segment) => segment === 'v1')
       || url.username || url.password || url.search || url.hash) return undefined;
   } catch {
     return undefined;

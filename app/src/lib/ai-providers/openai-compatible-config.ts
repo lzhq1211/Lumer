@@ -34,10 +34,6 @@ function isLoopbackHost(hostname: string): boolean {
   return normalized === 'localhost' || normalized === '127.0.0.1' || normalized === '::1';
 }
 
-function hasV1Path(pathname: string): boolean {
-  return pathname.split('/').some((segment) => segment === 'v1');
-}
-
 function parseBaseUrl(value: string): string {
   let url: URL;
   try {
@@ -48,7 +44,7 @@ function parseBaseUrl(value: string): string {
 
   const allowedProtocol = url.protocol === 'https:'
     || (url.protocol === 'http:' && isLoopbackHost(url.hostname));
-  if (!allowedProtocol || !hasV1Path(url.pathname) || url.username || url.password || url.search || url.hash) {
+  if (!allowedProtocol || url.username || url.password || url.search || url.hash) {
     throw new OpenAICompatibleConfigError('invalid_base_url', { reason: 'url_policy' });
   }
 

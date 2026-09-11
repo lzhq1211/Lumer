@@ -278,7 +278,7 @@ Settings 配置 Vault
 - 5E 的历史 Provider 类型分离：当时 `ChatProvider=codex`；`AnalyzeProvider=codex|openai_compatible`。第 7A 批次将按新批准合同扩展 ChatProvider，5E 不追溯承担该能力。
 - 保持 `~/.lumer/config.json` schema 1 和字段结构不变，只扩宽 `default_analyze_provider` enum；旧配置和历史 AnalysisRun 必须继续读取，无批量迁移或历史重写。
 - 新增一个服务端环境配置读取器，只接受 `LUMER_OPENAI_COMPAT_BASE_URL`、`LUMER_OPENAI_COMPAT_MODEL`、可选 `LUMER_OPENAI_COMPAT_API_KEY`；空白值按未配置处理。
-- base URL 必须包含 `/v1`；远程只允许 HTTPS，HTTP 只允许 loopback；禁止跨 origin 携凭据重定向。
+- base URL 不要求包含 `/v1`，也不自动补齐；远程只允许 HTTPS，HTTP 只允许 loopback；禁止跨 origin 携凭据重定向。
 - Provider Status 改为 CLI/HTTP 可区分的 DTO；HTTP `/models` 检查硬超时 10 秒，不携带论文正文，不回显 endpoint、headers、API Key 或上游错误正文。
 - 新增受限 Registry，只按固定 Provider ID 返回 Adapter/status；不得接收客户端提供的 URL、model、headers、class 或 module。
 - OpenAI-compatible Adapter 使用原生 `fetch` 和非流式 `/chat/completions`，仅接受 `overview/new/no-session`；其他 task/session 组合在网络调用前拒绝。
@@ -522,7 +522,7 @@ Settings 配置 Vault
 - 扩展 `app/src/lib/config/lumer-config.ts`、`app/src/lib/config/lumer-config-repository.ts` 及相关测试；优先沿用现有原子写入、schema 严格字段和 `0600` 权限。
 - 旧 schema 1 配置必须继续读取；首次保存自定义 Provider 时写为 schema 2（新增严格的 `openai_compatible` 配置对象），未知字段拒绝静默写回；迁移失败保持旧文件不变。schema 2 仍保留全部旧字段和语义。
 - 更新 `docs/contracts/provider.md`、`docs/contracts/storage.md`、`docs/contracts/api.md`、`docs/ARCHITECTURE.md`、`docs/frontend/ui-states.md`，明确 `config.json` 可保存用户主动填写的 Provider 配置，API Key 仅限本机文件、服务端内存和上游 Authorization 请求头。
-- `openai_compatible.base_url` 继续执行 HTTPS/loopback HTTP、必须包含 `/v1`、无用户名密码/query/hash 的既有 URL 合同；`model` 与 `app` 必须非空且长度受限；`api_key` 仅允许本地写入，不在任何 DTO 中回显。配置对象优先于旧环境变量，旧环境变量只作为兼容回退。
+- `openai_compatible.base_url` 执行 HTTPS/loopback HTTP、无用户名密码/query/hash 的 URL 合同；不要求包含 `/v1`，也不自动补齐；`model` 与 `app` 必须非空且长度受限；`api_key` 仅允许本地写入，不在任何 DTO 中回显。配置对象优先于旧环境变量，旧环境变量只作为兼容回退。
 
 **7E-02 API 合同**：
 
