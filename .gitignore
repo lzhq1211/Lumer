@@ -21,6 +21,7 @@
 **/.env.local
 **/.env.*.local
 !**/.env.example
+**/.lumer/
 *.pem
 
 # TypeScript and runtime logs
