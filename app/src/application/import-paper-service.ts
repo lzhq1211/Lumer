@@ -20,6 +20,7 @@ import { PaperRepository } from '@/lib/storage/paper-repository';
 import { managedPdfRelativePath, safeFileStem } from '@/lib/storage/safe-file-name';
 import { commitStagedFile, removeVaultFile } from '@/lib/storage/staged-file';
 import { VaultContext } from '@/lib/storage/vault-path';
+import { identifyAuthors, identifyDoi, identifyJournal, identifyYear } from '@/lib/metadata/pdf-metadata';
 
 export interface ImportPaperResult {
   readonly paper: PaperRecord;
@@ -97,6 +98,10 @@ export class ImportPaperService {
       if (duplicate) return { paper: duplicate, duplicate: true };
 
       const extractionResult = await extractPdfText(sourcePath);
+      const detectedDoi = identifyDoi(extractionResult.metadata, extractionResult.pages);
+      const detectedAuthors = identifyAuthors(extractionResult.metadata);
+      const detectedYear = identifyYear(extractionResult.metadata, extractionResult.pages);
+      const detectedJournal = identifyJournal(extractionResult.metadata, extractionResult.pages);
       const pdfs = new ManagedPdfStore(context);
       const extractions = new ExtractionRepository(context);
       const operations = new ImportOperationRepository(context);
@@ -143,11 +148,11 @@ export class ImportPaperService {
         pdf_revision: 1,
         pdf_path: pdfPath,
         original_file_name: normalizedFileName,
-        title: initialTitle(normalizedFileName),
-        authors: [],
-        year: null,
-        journal: null,
-        doi: null,
+        title: extractionResult.metadata.title?.trim() || initialTitle(normalizedFileName),
+        authors: detectedAuthors,
+        year: detectedYear,
+        journal: detectedJournal,
+        doi: detectedDoi,
         tags: [],
         status: 'inbox',
         current_final_run_id: null,

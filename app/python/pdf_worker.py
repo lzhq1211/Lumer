@@ -98,6 +98,12 @@ def inspect_and_extract(payload):
             "ok": True,
             "data": {
                 "pymupdf_version": pymupdf.__version__,
+                "metadata": {
+                    "title": (document.metadata or {}).get("title") or None,
+                    "author": (document.metadata or {}).get("author") or None,
+                    "subject": (document.metadata or {}).get("subject") or None,
+                    "keywords": (document.metadata or {}).get("keywords") or None,
+                },
                 "page_count": page_count,
                 "extracted_char_count": extracted_char_count,
                 "estimated_tokens": token_estimate,

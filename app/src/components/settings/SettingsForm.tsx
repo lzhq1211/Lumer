@@ -7,6 +7,7 @@ import type { FormEvent } from 'react';
 import type { SettingsProviderStatus } from '@/application/provider-status-service';
 import { AlertBanner } from '@/components/ui/AlertBanner';
 import { Button } from '@/components/ui/Button';
+import { EasyScholarSettings } from '@/components/settings/EasyScholarSettings';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import type { LumerConfigInput, SettingsView } from '@/lib/config/lumer-config';
 import type { AIProvider, AnalyzeProvider, ChatProvider } from '@/types';
@@ -291,6 +292,8 @@ export function SettingsForm() {
           <AlertBanner tone="info" title="Vault 尚未配置">输入一个已存在的可读写目录后保存。</AlertBanner>
         )}
       </section>
+
+      <EasyScholarSettings />
 
       <section className="lumer-settings-section">
         <div className="lumer-section-title">

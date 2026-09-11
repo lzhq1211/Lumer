@@ -18,12 +18,14 @@ export interface LumerConfig {
   default_chat_provider: ChatProvider | null;
   default_analyze_provider: AnalyzeProvider | null;
   openai_compatible?: OpenAICompatibleSettings | null;
+  easyscholar_secret_key?: string | null;
 }
 
 export interface LumerConfigInput {
   vault_path: string;
   default_chat_provider: ChatProvider | null;
   default_analyze_provider: AnalyzeProvider | null;
+  easyscholar_secret_key?: string | null;
 }
 
 export type VaultStatus = 'unconfigured' | 'valid' | 'unavailable' | 'permission_denied';
@@ -104,11 +106,8 @@ function parseAnalyzeProvider(value: unknown): AnalyzeProvider | null | undefine
 }
 
 export function parseLumerConfigInput(value: unknown): LumerConfigInput {
-  if (!isRecord(value) || !hasExactKeys(value, [
-    'default_analyze_provider',
-    'default_chat_provider',
-    'vault_path',
-  ])) {
+  const baseKeys = ['default_analyze_provider', 'default_chat_provider', 'vault_path'];
+  if (!isRecord(value) || !(hasExactKeys(value, baseKeys) || hasExactKeys(value, [...baseKeys, 'easyscholar_secret_key']))) {
     throw new LumerConfigParseError('设置请求字段不完整或包含未知字段。', 'invalid');
   }
 
@@ -132,6 +131,7 @@ export function parseLumerConfigInput(value: unknown): LumerConfigInput {
     vault_path: vaultPath,
     default_chat_provider: chatProvider,
     default_analyze_provider: analyzeProvider,
+    ...(typeof value.easyscholar_secret_key === 'string' ? { easyscholar_secret_key: value.easyscholar_secret_key.trim() || null } : {}),
   };
 }
 
@@ -149,8 +149,10 @@ export function parseLumerConfig(value: unknown): LumerConfig {
   }
 
   const expectedKeys = ['default_analyze_provider', 'default_chat_provider', 'schema_version', 'vault_path'];
+  const v2Keys = [...expectedKeys, 'openai_compatible'];
+  const v2KeysWithEasyScholar = [...v2Keys, 'easyscholar_secret_key'];
   if (!hasExactKeys(value, expectedKeys)
-    && !(value.schema_version === LUMER_CONFIG_SCHEMA_VERSION && hasExactKeys(value, [...expectedKeys, 'openai_compatible']))) {
+    && !(value.schema_version === LUMER_CONFIG_SCHEMA_VERSION && (hasExactKeys(value, v2Keys) || hasExactKeys(value, v2KeysWithEasyScholar)))) {
     throw new LumerConfigParseError('本地配置文件字段不完整或包含未知字段。', 'invalid');
   }
 
@@ -158,6 +160,7 @@ export function parseLumerConfig(value: unknown): LumerConfig {
     vault_path: value.vault_path,
     default_chat_provider: value.default_chat_provider,
     default_analyze_provider: value.default_analyze_provider,
+    ...(Object.prototype.hasOwnProperty.call(value, 'easyscholar_secret_key') ? { easyscholar_secret_key: value.easyscholar_secret_key } : {}),
   });
 
   const openaiCompatible = value.schema_version === LEGACY_LUMER_CONFIG_SCHEMA_VERSION
@@ -170,6 +173,11 @@ export function parseLumerConfig(value: unknown): LumerConfig {
   return {
     schema_version: value.schema_version as LumerConfig['schema_version'],
     ...input,
-    ...(value.schema_version === LUMER_CONFIG_SCHEMA_VERSION ? { openai_compatible: openaiCompatible } : {}),
+    ...(value.schema_version === LUMER_CONFIG_SCHEMA_VERSION ? {
+      openai_compatible: openaiCompatible,
+      ...(Object.prototype.hasOwnProperty.call(value, 'easyscholar_secret_key')
+        ? { easyscholar_secret_key: input.easyscholar_secret_key ?? null }
+        : {}),
+    } : {}),
   };
 }

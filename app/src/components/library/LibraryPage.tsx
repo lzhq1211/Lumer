@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { PaperMetadataEditor } from '@/components/library/PaperMetadataEditor';
+import { PublicationLabels } from '@/components/library/PublicationLabels';
 import { AlertBanner } from '@/components/ui/AlertBanner';
 import type { PaperRecord } from '@/domain/paper';
 import type { PaperSummary } from '@/domain/paper-library';
@@ -325,12 +326,12 @@ export function LibraryPage({ view }: LibraryPageProps) {
             </div>
             <div className="lumer-paper-table" role="table" aria-label="论文列表">
               <div className="lumer-paper-table-header" role="row">
-                <span role="columnheader">论文</span><span role="columnheader">标签</span><span role="columnheader">年份</span><span role="columnheader">状态</span><span role="columnheader">Final</span><span role="columnheader">操作</span>
+                <span role="columnheader">论文</span><span role="columnheader">期刊标签</span><span role="columnheader">年份</span><span role="columnheader">状态</span><span role="columnheader">Final</span><span role="columnheader">操作</span>
               </div>
               {visiblePapers.map(({ paper, has_current_final: hasCurrentFinal, latest_analysis: latestAnalysis }) => (
                 <div className="lumer-paper-row" key={paper.paper_id} role="row">
                   <div className="lumer-paper-identity" role="cell"><Link aria-label={`打开 ${paper.title}`} href={`/reader/${paper.paper_id}`}><strong title={paper.title}>{paper.title}</strong><span title={paper.authors.join(', ')}>{paper.authors.length ? paper.authors.join(', ') : '未填写作者'}</span></Link></div>
-                  <div className="lumer-paper-tags" role="cell">{paper.tags.length ? paper.tags.slice(0, 2).map((tag) => <span key={tag}>{tag}</span>) : <small>—</small>}</div>
+                  <div className="lumer-paper-tags" role="cell"><PublicationLabels journal={paper.journal} paperId={paper.paper_id} /></div>
                   <span role="cell">{paper.year ?? '—'}</span>
                   <span className={`lumer-paper-status is-${paper.status}`} role="cell">{statusLabels[paper.status]}</span>
                   <span className={hasCurrentFinal ? 'lumer-status-badge lumer-status-success' : 'lumer-status-badge lumer-status-neutral'} role="cell">{hasCurrentFinal ? <><CheckCircle2 aria-hidden="true" size={12} />已有</> : '未有'}</span>

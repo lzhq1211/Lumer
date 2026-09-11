@@ -2,8 +2,10 @@ import { PDF_EXTRACTION_VERSION, PDF_LIMITS, PdfLimits } from '@/lib/pdf/pdf-lim
 import { checkPdfContainer, PdfSupportError } from '@/lib/pdf/pdf-support-check';
 import { PdfWorkerError, runPdfWorker } from '@/lib/pdf/pdf-worker-client';
 import { computeExtractedContentHash } from '@/lib/pdf/content-hash';
+import { PdfDocumentMetadata } from '@/lib/metadata/pdf-metadata';
 
 export interface PdfExtractionResult {
+  readonly metadata: PdfDocumentMetadata;
   readonly extractionVersion: string;
   readonly pymupdfVersion: string;
   readonly fileSize: number;
@@ -40,6 +42,7 @@ export async function extractPdfText(
   try {
     const extracted = await runPdfWorker(pdfPath, limits);
     return {
+      metadata: extracted.metadata ?? { title: null, author: null, subject: null, keywords: null },
       extractionVersion: PDF_EXTRACTION_VERSION,
       pymupdfVersion: extracted.pymupdf_version,
       fileSize,

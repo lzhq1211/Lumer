@@ -12,10 +12,18 @@ const WorkerPageSchema = z.strictObject({
   text: z.string(),
 });
 
+const WorkerMetadataSchema = z.strictObject({
+  title: z.string().nullable(),
+  author: z.string().nullable(),
+  subject: z.string().nullable(),
+  keywords: z.string().nullable(),
+});
+
 const WorkerSuccessSchema = z.strictObject({
   ok: z.literal(true),
   data: z.strictObject({
     pymupdf_version: z.string().min(1),
+    metadata: WorkerMetadataSchema.optional(),
     page_count: z.number().int().min(1),
     extracted_char_count: z.number().int().min(0),
     estimated_tokens: z.number().int().min(0),

@@ -286,7 +286,12 @@ export class SettingsService {
         default_chat_provider: input.default_chat_provider,
         default_analyze_provider: input.default_analyze_provider,
         ...(currentConfig?.schema_version === LUMER_CONFIG_SCHEMA_VERSION
-          ? { openai_compatible: currentConfig.openai_compatible ?? null }
+          ? {
+            openai_compatible: currentConfig.openai_compatible ?? null,
+            ...((input.easyscholar_secret_key ?? currentConfig.easyscholar_secret_key) !== undefined
+              ? { easyscholar_secret_key: input.easyscholar_secret_key ?? currentConfig.easyscholar_secret_key ?? null }
+              : {}),
+          }
           : {}),
       };
       await this.coordinator.switchVault(
