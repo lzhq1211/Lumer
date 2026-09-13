@@ -3,7 +3,6 @@
 **文档版本**：v1.7
 **日期**：2026-09-05
 **事实来源**：`IMPLEMENTATION_PLAN.md` v1.9-final-paper-card-chat 与 `PROGRESS.md`（截至 2026-09-05 的最新确认口径）
-**上游源码起点**：Annot `d785f1dd25f6e5179023ad504b280058d8b179b8`（仅作复制裁剪起点，运行时零依赖）
 **语言合同**：界面与 Paper Card / Markdown 总结默认简体中文；论文原始 Metadata 与 Evidence quote 保持论文原语言（UI-COPY-01）
 ---
 
@@ -38,7 +37,6 @@
 
 ### 证据
 
-- **Annot 源码只读审计**（2026-08-31，commit `d785f1dd`）：`/api/papers` 固定返回空数组（无论文数据层）；AI 仅收到 PDF 路径、由 CLI 自行读取（无结构化合同）；Markdown 仅为浏览器下载、不落盘。三项能力缺口经审计确认真实存在；
 - **用户显式决策**（2026-08-31 产品边界确认）："Analyze 结果只有通过 Schema Validation 和 Evidence Verification 才能成为正式 Paper Card"——直接表达了对未验证 AI 输出的不信任；
 - **历史文档失控实例**：原 v0.1 PRD 曾在 Library Folder 问题上出现两处口径冲突，最终由用户裁决彻底移除 Folder——说明缺少单一事实源会导致范围漂移，这也是本次重写 PRD 的直接动因之一。
 
@@ -82,17 +80,14 @@ V1 无。其他具有相同工作流的研究者属于 V1 之后的议题，当�
 | 替代方案 | 关键缺口 |
 |---|---|
 | 通用 AI 聊天（网页/桌面） | 无结构合同、无证据定位，会话结束结论即蒸发 |
-| Annot（源码起点） | 有 PDF 阅读 + Codex/Claude Provider，但无论文数据层、无结构化 Analyze、无 Evidence 验证、Markdown 不落盘 |
 | 文献管理工具（Zotero 类） | 偏重元数据管理，深读与证据级验证缺失；多含云同步/账号模型，V1 明确不做 Zotero Sync |
 
 **差异化定位**：证据可复核的单篇论文分析 + 本地文件主权（Vault 即数据根，Obsidian 直接可读）。
 
-> 🔶 **Assumption**：以上对比基于产品常识与 Annot 审计，未做系统性竞品调研；对个人工具决策足够，若产品对外发布需补做竞品分析。
 
 ### Why Now
 
 - **能力已具备**：Codex CLI 的本机登录态和既有 Provider port/Run/SSE 边界可继续复用；新增 OpenAI-compatible Adapter 无需建设第二套 Analysis Runtime；
-- **源码起点已锁定**：Annot 快照（`d785f1dd`）提供 PDF 阅读、标注、Provider/Streaming 等可复用实现；
 - **合同已全部冻结**：C01–C08 与全部 UI 交互合同（UI-NAV-01、UI-B01、UI-B02、UI-NAV-02、UI-FLOW-01、UI-COPY-01、PLAN-UI-01）均已确认，计划批准门已开放；
 - **知识库已就位**：用户已有 Obsidian Vault 作为长期沉淀目标。
 
@@ -336,12 +331,7 @@ V1 完成要求第 7 阶段 Chat 能力和第 8 阶段四个验收批次全部�
 - 启动时残留 `running` 转为 `interrupted`；残留 `finalizing` 按 Current Final 指针恢复（已指向则补为 `finalized`，否则退回 `draft` 并记录 commit error）；
 - 重启后 Vault、Library、Reader、Current Final、History、Evidence 回跳与 Markdown 基线全部恢复。
 
-**US-11 非功能需求（全局）**
-- 本地服务仅绑定 `127.0.0.1`，限制同源请求，不对局域网开放；
-- 所有业务路径在已验证 Vault 内解析，拒绝 `..`、绝对子路径与 symlink escape；
-- 持久化 JSON 一律使用同目录临时文件 + flush/fsync + close + 原子 rename，禁止直接覆写；
-- 界面与文档语言遵循 UI-COPY-01；按钮提供 Tooltip、选中态与 `aria-label`；Light-only、Desktop-first（V1 Desktop-only）；
-- 性能按个人规模评估；实测超出可接受范围时返回 `/plan` 重新决策，不预建数据库。
+
 
 ### 领域合同映射
 
@@ -367,7 +357,6 @@ V1 完成要求第 7 阶段 Chat 能力和第 8 阶段四个验收批次全部�
 | 用户配置的 OpenAI-compatible API | 用于可选论文 Overview 与 Final 后自由 Chat；服务端环境提供一个 base URL/model/API Key 档案 | 兼容实现、鉴权、模型可用性和上下文限制由外部服务决定；失败不得 fallback |
 | Obsidian Vault（用户目录） | 全部业务数据的根 | 路径失效/权限变化需进入 Settings 修复 |
 | PyMuPDF | 正文提取与 Annotation 写入 | 提取行为差异影响正文基线与证据定位 |
-| Annot 快照 `d785f1dd` | 源码起点（仅复制裁剪，运行时零依赖） | 上游缺陷若被复制需在 Lumer 内修复 |
 | Node.js 22 生态 / Next.js / Vitest / Playwright | 运行与测试基础设施 | 版本升级兼容性 |
 | 用户验收时间 | 每个批次完成后暂停评审 | 批次节奏依赖用户可用性 |
 
