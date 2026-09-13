@@ -195,7 +195,7 @@ Settings 配置 Vault
 | C05 | Finding Gate：每个 Finding ≥1 条 verified Evidence，Final 保留证据全部 verified；不可绕过 | 4D–4F |
 | C06 | Evidence 定位：exact→normalized→全文三级匹配；禁止模糊/语义/跨页；保留完整审计字段 | 4C–4D |
 | C07 | Final commit：崩溃安全原子 commit point；Markdown 为派生输出，失败/冲突不回滚 Final | 4F–4G、6C、6E |
-| C08 | Provider 边界：Final Paper Card 后的 Chat / Overview 可选 Codex/OpenAI-compatible；HTTP 配置仅服务端环境；Session/task 隔离、无伪 fallback；Claude Code 仅为不可操作 UI 占位 | 5A–5F、7A–7D |
+| C08 | Provider 边界：Final Paper Card 后的 Chat / Overview 可选 Codex/OpenAI-compatible；HTTP 配置仅服务端环境；Session/task 隔离、无伪 fallback | 5A–5F、7A–7D |
 
 ---
 
