@@ -22,6 +22,7 @@ import { AnalysisRunControlServiceError } from '@/application/analysis-run-contr
 import { ProviderAvailabilityError } from '@/application/provider-availability';
 import { VaultOperationCoordinatorError } from '@/application/vault-operation-coordinator';
 import { ProviderTaskContractError } from '@/lib/ai-providers/task-contract';
+import { EasyScholarError } from '@/lib/easyscholar/easyscholar-client';
 import { PdfSupportError } from '@/lib/pdf/pdf-support-check';
 import { StorageSchemaError } from '@/lib/storage/schema-registry';
 
@@ -206,6 +207,22 @@ export function apiError(error: unknown): NextResponse<ApiErrorBody> {
         },
       },
       { status: error.status },
+    );
+  }
+
+  if (error instanceof EasyScholarError) {
+    const status = error.code === 'NOT_CONFIGURED' ? 422 : 502;
+    return NextResponse.json(
+      {
+        error: {
+          code: `EASY_SCHOLAR_${error.code}`,
+          message: error.message,
+          retryable: error.code === 'REQUEST_FAILED',
+          stage: null,
+          details: null,
+        },
+      },
+      { status },
     );
   }
 

@@ -166,6 +166,7 @@ export class ProviderConfigService {
         default_chat_provider: current.default_chat_provider,
         default_analyze_provider: current.default_analyze_provider,
         openai_compatible: profile,
+        easyscholar_secret_key: current.easyscholar_secret_key ?? null,
       };
       await this.repository.write(next);
       return toView(next);

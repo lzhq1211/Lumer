@@ -114,6 +114,27 @@ describe('Provider config API contract', () => {
     await expect(readConfiguredOpenAICompatibleConfig()).resolves.toMatchObject({ api_key: 'local-secret' });
   });
 
+  it('preserves the EasyScholar key when saving Provider settings', async () => {
+    const repository = new LumerConfigRepository(configDirectory);
+    await repository.write({
+      schema_version: 2,
+      vault_path: path.join(testRoot, 'Vault'),
+      default_chat_provider: null,
+      default_analyze_provider: null,
+      openai_compatible: null,
+      easyscholar_secret_key: 'easy-scholar-secret',
+    });
+
+    const response = await PUT(sameOriginRequest('http://localhost/api/provider-config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ app: 'API', base_url: 'https://provider.example/v1', model: 'model', api_key: 'provider-secret' }),
+    }));
+
+    expect(response.status).toBe(200);
+    await expect(repository.read()).resolves.toMatchObject({ easyscholar_secret_key: 'easy-scholar-secret' });
+  });
+
   it('clears the key only through the dedicated same-origin DELETE', async () => {
     await PUT(sameOriginRequest('http://localhost/api/provider-config', {
       method: 'PUT',
