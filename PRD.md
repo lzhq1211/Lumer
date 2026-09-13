@@ -189,7 +189,7 @@ Settings 配置 Vault
 | C05 | Finding Gate：每个 Finding ≥1 条 verified Evidence，Final 保留证据全部 verified；不可绕过 | 4D–4F |
 | C06 | Evidence 定位：exact→normalized→全文三级匹配；禁止模糊/语义/跨页；保留完整审计字段 | 4C–4D |
 | C07 | Final commit：崩溃安全原子 commit point；Markdown 为派生输出，失败/冲突不回滚 Final | 4F–4G、6C、6E |
-| C08 | Provider 边界：Final Paper Card 后的 Chat / Overview 可选 Codex/OpenAI-compatible；HTTP 配置仅服务端环境；Session/task 隔离、无伪 fallback；Claude Code 仅为不可操作 UI 占位 | 5A–5F、7A–7D |
+| C08 | Provider 边界：Final Paper Card 后的 Chat / Overview 可选 Codex/OpenAI-compatible；HTTP 配置仅服务端环境；Session/task 隔离、无伪 fallback | 5A–5F、7A–7D |
 
 ---
 
@@ -330,12 +330,7 @@ V1 完成要求第 7 阶段 Chat 能力和第 8 阶段四个验收批次全部�
 - 启动时残留 `running` 转为 `interrupted`；残留 `finalizing` 按 Current Final 指针恢复（已指向则补为 `finalized`，否则退回 `draft` 并记录 commit error）；
 - 重启后 Vault、Library、Reader、Current Final、History、Evidence 回跳与 Markdown 基线全部恢复。
 
-**US-11 非功能需求（全局）**
-- 本地服务仅绑定 `127.0.0.1`，限制同源请求，不对局域网开放；
-- 所有业务路径在已验证 Vault 内解析，拒绝 `..`、绝对子路径与 symlink escape；
-- 持久化 JSON 一律使用同目录临时文件 + flush/fsync + close + 原子 rename，禁止直接覆写；
-- 界面与文档语言遵循 UI-COPY-01；按钮提供 Tooltip、选中态与 `aria-label`；Light-only、Desktop-first（V1 Desktop-only）；
-- 性能按个人规模评估；实测超出可接受范围时返回 `/plan` 重新决策，不预建数据库。
+
 
 ### 领域合同映射
 
