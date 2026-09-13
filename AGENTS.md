@@ -7,7 +7,6 @@
 
 ## 文档职责
 
-- `docs/ARCHITECTURE.md`：系统模块、数据流、Annot 复用边界。
 - `docs/contracts/*.md`：不可违反的领域合同。
 - `docs/frontend/*.md`：前端设计合同；1D 未通过不得进入 2A。
 - `docs/testing/TEST_PLAN.md`：测试分层与质量门。

@@ -9,7 +9,6 @@
 **计划版本**：v1.9-final-paper-card-chat
 **日期**：2026-09-05
 **状态**：阶段 1、阶段 2（2A–2F）、阶段 3（3A–3D）、阶段 4（4A–4G）及阶段 5 原批次（5A-Chat、5B–5D）已完成自动验证；5E 基础合同与 5F Overview 产品接入已完成代码和自动验证，真实外部 Live Smoke/人工验收尚未执行。6H Library 解析结果入口及 6I Library 表格密度已完成代码和自动验证，人工验收待用户执行。2026-09-05 已重新规划阶段 7；不得自动进入 7A。
-**源码起点**：Annot `d785f1dd25f6e5179023ad504b280058d8b179b8`
 
 ## 2026-09-06 Vortex UI 改版规划门（已确认，按批次实施）
 
@@ -112,8 +111,6 @@ Settings 配置 Vault
 
 | 批次 | 唯一核心能力 | 完成边界 |
 |---|---|---|
-| 1A | 复制源码与依赖 | 复制 Annot 源码快照、锁文件和必要资源；只得到可追溯上游基线，不重命名、不重构产品能力 |
-| 1B | Lumer 独立化与基线验证 | 重命名 package、品牌、环境变量和存储 key，消除 Annot 运行时路径/API 引用；建立 typecheck、lint、unit test、build 命令并完成独立启动验证，不建设新领域功能 |
 | 1B-S | Security Baseline | 只将 Next.js 从 `16.2.1` 显式升级到官方安全版本 `16.3.3` 并更新必要 lockfile；禁止 `npm audit fix --force`、无关依赖升级和功能开发；自动门及 Viewer/Annotation/Chat 基线全部通过后才冻结新独立基线 |
 | 1C | Architecture / Data Contracts | 将 C01–C08 映射为最终模块边界、路由/API 职责、数据所有权、DTO/schema、错误码和测试责任；只冻结架构工件，2B/4A 再实现可执行 Schema 与 Repository |
 | 1D | Frontend Design Baseline | 基于 `docs/frontend/` 已确认输入一次性冻结 canonical Final Design Tokens、四页真实低保真、导航、组件、区域尺寸和完整状态矩阵；只产出设计工件，不写业务代码 |
@@ -140,7 +137,6 @@ Settings 配置 Vault
 - `npm run build`
 - `npm run test:e2e`
 - 1B-S 执行 `npm audit --omit=dev`，不得用 `npm audit fix --force` 代替精确升级。
-- `rg` 检查无 Annot 运行时路径依赖。
 - C01–C08 对 Architecture / Data Contracts 的逐项 traceability 检查，无未归属字段、错误或写入责任。
 - Final Design Token JSON schema 校验、四页/全状态覆盖检查和低保真浏览器截图回归。
 
@@ -148,7 +144,6 @@ Settings 配置 Vault
 
 - 本地启动后能打开 Lumer 页面。
 - 使用一个普通 PDF 验证 Viewer、Annotation 与 Chat 基线。
-- 临时移走兄弟 Annot 后重新启动 Lumer。
 - 用户逐页评审 1D 的真实低保真、状态矩阵、最小窗口宽度和基础组件选择。
 
 **阶段门**：1A、1B、1B-S、1C、1D 各自暂停一次。正式顺序固定为 `1B-S Security Baseline → 1C Architecture / Data Contracts → 1D Frontend Design Baseline → 2A App Shell / Settings`；1D 未通过不得开始 2A。
@@ -579,7 +574,6 @@ Library 二级栏精确宽度、Analysis 分栏比例、基础组件选择和最
 批准本计划意味着同时接受：
 
 - `PRD.md` 的 V1 产品范围与硬性非目标。
-- `docs/ARCHITECTURE.md` 的技术口径、Annot 复用边界与模块职责。
 - `docs/contracts/` 的 C01–C08、Vault 数据布局、Evidence Gate 与 Final commit 合同。
 - 本计划的七阶段、编号批次顺序与逐批暂停评审。
 - `docs/frontend/` 已确认的 UI Baseline、信息架构、状态矩阵与 1D 前端设计批次位置。

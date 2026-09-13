@@ -2,7 +2,6 @@
 
 **版本**：v1.3（Final Paper Card 门控 Chat 扩展）
 
-> 本文回答“系统如何构成、Annot 哪些能力复用、各模块职责是什么”。字段级不可违反规则见 `docs/contracts/`。
 
 ## 1. 核心技术口径
 
@@ -21,33 +20,9 @@
 
 ---
 
-## 2. Annot 复用与清理边界
+## 2. 数据与文件总体布局
 
-| Annot 能力 | Lumer 处理方式 |
-|---|---|
-| Next.js / React / Tailwind 基础 | 复制到当前仓库并更名为 Lumer |
-| `PdfViewer`、`react-pdf`、PDF worker | 保留并按 `paper_id` 重接数据 |
-| PyMuPDF Highlight / Memo | 保留；继续写入托管 PDF 标准 Annotation |
-| Provider | 保留 Codex Provider Adapter 与鉴权检测；5E–5F 增加 OpenAI-compatible HTTP Overview Adapter，7C 扩展为 Final Paper Card 后的 HTTP Chat；Claude Code 仍只保留不可操作 UI 占位 |
-| Session / Streaming | 保留核心实现；去除 Folder Session，增加 Analyze 任务入口 |
-| Markdown Preview / Download | 保留组件模式，主流程改为 Vault 写入 |
-| Folder Tree / FolderView / Folder API | 删除，不进入 Lumer 产品层 |
-| Annot 首页、品牌、Demo、Prompt | 删除或重写 |
-| `.annot/sessions.json` | 改为 `.lumer/sessions/<paper_id>.json` |
-| `/api/papers` 空列表实现 | 重写为真实 Paper Repository API |
-| Annot 路径、环境变量和存储键 | 全部更名为 Lumer，不允许残留运行时引用 |
-
-独立性验收：
-
-- Lumer 源码、构建配置和运行命令全部位于当前仓库。
-- 删除或移动兄弟目录 Annot 后，Lumer 的安装、构建和运行不受影响。
-- 源码中不存在指向 `/Users/.../Annot`、`../Annot` 或 Annot API 的运行时路径。
-
----
-
-## 3. 数据与文件总体布局
-
-### 3.1 Vault 布局
+### 2.1 Vault 布局
 
 ```text
 Vault/
@@ -73,7 +48,7 @@ Vault/
         └── <paper_id>.json
 ```
 
-### 3.2 文件所有权
+### 2.2 文件所有权
 
 | 文件 | 所有权与写入规则 |
 |---|---|
@@ -89,9 +64,9 @@ Vault/
 
 > 具体配置、命名、PaperRecord、ExtractedPaper 与 Final commit 规则见 `docs/contracts/storage.md`。
 
-## 4. 应用组件与模块边界
+## 3. 应用组件与模块边界
 
-### 4.0 依赖方向与目录职责
+### 3.0 依赖方向与目录职责
 
 冻结依赖方向：
 
@@ -118,20 +93,19 @@ Filesystem adapter / CLI adapter / PyMuPDF worker
 
 禁止横向绕过：Route 不直接写 Repository，Repository 不调用 Provider，Provider Adapter 不写领域文件，Renderer 不反向解析 Markdown，UI 不自行决定 Gate 或 Run 状态。
 
-### 4.1 独立项目基线
+### 3.1 独立项目基线
 
 目标：先得到“功能未变但已独立”的 Lumer 基线，再做产品重构。
 
 冻结变化：
 
-- 复制 Annot 当前源码快照到本仓库，不复制 Annot `.git`。
 - `package.json`、页面标题、localStorage key、环境变量、API 文案统一更名为 Lumer。
 - 增加只绑定 `127.0.0.1` 的本地启动命令；日常使用走 production build/start，不把开发服务器作为交付形态。
 - 保留锁文件，新增 `typecheck`、`test`、`test:integration`、`test:e2e` scripts。
 - 建立 Vitest、React Testing Library 和 Playwright 基础配置。
 - 记录上游 commit，但运行时无兄弟仓库依赖。
 
-### 4.2 Settings 与 Vault 配置
+### 3.2 Settings 与 Vault 配置
 
 冻结模块：
 
@@ -155,7 +129,7 @@ src/app/settings/page.tsx
 - Import、Annotation、Chat Provider task、Analyze/Finalize、Markdown sync 和 Delete 持有 Vault mutation lease；切换 Vault 必须取得 exclusive lease，有在途 mutation 时返回 `VAULT_BUSY`。
 - 每个 Vault 同时只允许一个 Lumer 进程持有 `.lumer/runtime.lock`；切换成功前先取得新 Vault 锁并完成校验，再原子保存配置，最后释放旧 Vault 锁。
 
-### 4.3 Paper Repository、导入与 Library
+### 3.3 Paper Repository、导入与 Library
 
 冻结模块：
 
@@ -201,9 +175,8 @@ Library 功能：
 - 是否存在 Current Final 的状态展示。
 - Paper 永久删除。
 
-删除保持 Annot 模式：一次确认后，在排他 lifecycle lease 内先恢复并清空该 Paper 的 Operation journals，再删除托管 PDF、PaperRecord、Extraction、全部 AnalysisRuns、PDF Sessions 和当前 `card_path` 指向的受管 Paper Card；无法安全恢复的 journal 阻止删除，已因“另存新文件”退出 Lumer 管理范围的旧 Markdown 不删除。确认文本明确列出对象，不增加废纸篓或恢复机制。
 
-### 4.4 Reader、Annotation 与页码桥接
+### 3.4 Reader、Annotation 与页码桥接
 
 冻结保留并重接：
 
@@ -234,7 +207,7 @@ src/lib/pdf/page-navigation.ts
 - URL 或 Reader 状态允许携带 `page=<display_page_number>`，以支持 Card 回跳。
 - PDF 缺失、损坏或被替换时显示明确错误，不自动创建新 Paper。
 
-### 4.5 Provider、Chat 与 Analyze 入口
+### 3.5 Provider、Chat 与 Analyze 入口
 
 冻结保留：
 
@@ -311,7 +284,7 @@ Analyze 流程：
 - Chat Session 与 AnalysisRun 分开存储；每个 Paper × Provider 有独立 Chat 历史。Codex 可续接 Session，HTTP 只有不可续接 task 与应用侧历史。
 - Explain Selection / Translate 使用同一 Chat 入口和当前选中文本，不写入 PaperAnalysis；它们同样受 Final Paper Card 门约束。
 
-### 4.6 Evidence Verification
+### 3.6 Evidence Verification
 
 冻结模块：
 
@@ -330,7 +303,7 @@ src/lib/evidence/verify-analysis.ts
 - Gate 结果包含每个 Finding 的通过/失败原因。
 - 只有 Current PDF 的 `content_hash` 与 AnalysisRun 一致时才能验证。
 
-### 4.7 Paper Card Preview、编辑与 Final
+### 3.7 Paper Card Preview、编辑与 Final
 
 冻结路由与组件：
 
@@ -356,7 +329,7 @@ src/components/analysis/AnalysisHistory.tsx
 - 保存新 Final 后旧 Run 仍保持 `finalized` 并显示在 History；不使用版本关系状态。
 - 失败或取消重新 Analyze 不影响 Current Final。
 
-### 4.8 Markdown Renderer 与外部冲突
+### 3.8 Markdown Renderer 与外部冲突
 
 冻结模块：
 
@@ -381,7 +354,7 @@ src/components/analysis/MarkdownConflictDialog.tsx
 - 另存成功后才更新 canonical `card_path`/`markdown_hash`；旧文件保持不动并退出 Lumer 管理范围。
 - 应用永不解析 Markdown 回写 JSON。
 
-### 4.9 错误与阶段状态
+### 3.9 错误与阶段状态
 
 用户可见阶段：
 
@@ -411,7 +384,7 @@ failed
 - 是否保留 Draft。
 - Current Final 是否仍安全保留。
 
-### 4.10 数据写入所有权
+### 3.10 数据写入所有权
 
 | 资源 | 唯一底层写入者 | 可发起写入的 Application Service | 不允许直接写入者 |
 |---|---|---|---|
@@ -440,7 +413,7 @@ failed
 
 所有 Paper mutation（Metadata、Annotation、Chat、Analyze、Finalize、Markdown sync、Delete）必须经过 `PaperOperationCoordinator`。普通 mutation 持有该 Paper 的共享生命周期 lease；Delete 必须取得排他 lease 并在锁内重验 PaperRecord revision。所有 PaperRecord read-modify-write 还必须取得独立的 per-Paper write mutex 并在锁内重读；Annotation 从最终重读 Record 到 PDF/Record commit 全程持锁，禁止 Metadata/Final/Sync 交错写入。Import 由 `ImportCoordinator` 按 `source_sha256` 加锁并在锁内重新执行重复扫描。
 
-### 4.11 正式 API 边界
+### 3.11 正式 API 边界
 
 - canonical API 路径、请求/响应 DTO、SSE 和错误码全部由 `docs/contracts/api.md` 冻结。
 - 本节列出的 `src/app/api/**/route.ts` 是 canonical 路径到 Next.js App Router 的一一映射；不得同时保留第二组 legacy Folder/path-based 业务 API。
@@ -449,7 +422,7 @@ failed
 
 ---
 
-## 5. 主要架构风险与控制
+## 4. 主要架构风险与控制
 
 | 风险 | 控制 |
 |---|---|
@@ -470,6 +443,6 @@ failed
 
 ---
 
-## 6. 架构变更规则
+## 5. 架构变更规则
 - UI 固定规则由 `docs/frontend/` 管理。
 - 本文描述模块职责，不决定批次先后；批次先后只以 `IMPLEMENTATION_PLAN.md` 为准。
