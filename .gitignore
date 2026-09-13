@@ -40,3 +40,6 @@
 /app/public/next.svg
 /app/public/vercel.svg
 /app/public/window.svg
+
+# Product documents kept local only
+PRD.md
