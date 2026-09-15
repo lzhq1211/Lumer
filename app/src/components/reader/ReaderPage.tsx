@@ -290,7 +290,10 @@ export function ReaderPage({ paperId }: ReaderPageProps) {
   function navigateToDisplayPage(displayPageNumber: number): void {
     if (pageCount === null) return;
     const navigation = pageNavigationFromDisplayPageNumber(displayPageNumber, pageCount);
-    window.location.assign(readerPageHref(navigation.display_page_number));
+    // 页码是 Reader 的本地状态，不触发 App Router 导航，避免解析流期间
+    // 的路由过渡锁住控件；History API 只负责保留可复制/刷新的页码地址。
+    setPageNumber(navigation.display_page_number);
+    window.history.replaceState(window.history.state, '', readerPageHref(navigation.display_page_number));
   }
 
   function restorePageFromUrl(nextPageCount: number): void {

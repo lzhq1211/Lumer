@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 import { EasyScholarError, fetchEasyScholarLabels } from '@/lib/easyscholar/easyscholar-client';
 import { PaperRepository } from '@/lib/storage/paper-repository';
 import { ExtractionRepository } from '@/lib/storage/extraction-repository';
-import { identifyJournal } from '@/lib/metadata/pdf-metadata';
+import { identifyJournal, isLikelyJournalName } from '@/lib/metadata/pdf-metadata';
 import { createVaultContext } from '@/lib/storage/vault-path';
 import { LumerConfigRepository } from '@/lib/config/lumer-config-repository';
 import { apiError, apiSuccess } from '@/lib/http/api-response';
@@ -20,7 +20,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pa
     const vault = await createVaultContext(config.vault_path);
     const paper = await new PaperRepository(vault).read(paperId);
     let journal = paper.journal;
-    if (!journal || /^REVIEWED BY|^EDITED BY/iu.test(journal)) {
+    if (!isLikelyJournalName(journal) || /^REVIEWED BY|^EDITED BY/iu.test(journal ?? '')) {
       const extraction = await new ExtractionRepository(vault).read(paperId);
       journal = identifyJournal(null, extraction.pages);
     }

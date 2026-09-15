@@ -19,4 +19,18 @@ describe('PDF metadata identification', () => {
     expect(identifyJournal({ title: null, author: null, subject: 'Proceedings of Testing', keywords: null }, [])).toBe('Proceedings of Testing');
     expect(identifyJournal(null, [{ text: 'Front. Neurosci. 17:1059186. diagnosing sleep disorders' }])).toBe('Front. Neurosci.');
   });
+
+  it('从常见出版社页眉提取干净的期刊名', () => {
+    expect(identifyJournal(null, [{ text: 'PLOS Biology | https://doi.org/10.1371/journal.pbio.3002193' }])).toBe('PLOS Biology');
+    expect(identifyJournal(null, [{ text: 'PLOS COMPUTATIONAL BIOLOGY\nRESEARCH ARTICLE\n论文标题' }])).toBe('PLOS COMPUTATIONAL BIOLOGY');
+    expect(identifyJournal(null, [{ text: 'Applied Neuropsychology: Child\nISSN: 2162-2965 (Print)' }])).toBe('Applied Neuropsychology: Child');
+    expect(identifyJournal(null, [{ text: 'and Adults. Brain Sci. 2022, 12, 550. 正文' }])).toBe('Brain Sci.');
+    expect(identifyJournal(null, [{ text: 'Behavior Research Methods (2026) 58:32\n论文标题' }])).toBe('Behavior Research Methods');
+    expect(identifyJournal(null, [{ text: 'Early Human Development 198 (2024) 106110\n论文标题' }])).toBe('Early Human Development');
+  });
+
+  it('拒绝把 DOI、ISSN 和网页说明当成期刊名', () => {
+    expect(identifyJournal(null, [{ text: 'https://doi.org/10.1371/journal.pbio.3002193 ence E/I.' }])).toBeNull();
+    expect(identifyJournal(null, [{ text: 'journal homepage: www.elsevier.com/locate/earlhumdev' }])).toBeNull();
+  });
 });
